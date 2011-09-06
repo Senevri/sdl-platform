@@ -1,0 +1,12 @@
+SOURCES += game.cpp gob.cpp InputHandler.cpp Zounds.cpp Console.cpp
+HEADERS += game.h gob.h InputHandler.h Zounds.h Console.h
+PKGCONFIG += sdl
+LIBS += -L/usr/local/libs -lSDL_ttf -lSDL_mixer
+DESTDIR = bin
+INCLUDEPATH += src
+INCLUDEPATH += /usr/include/SDL /usr/local/include/SDL
+DEPENDPATH += src
+QT -= gui core
+CXX_FLAGS += -g -Wall -o3
+CONFIG += link_pkgconfig
+PKGCONFIG += sdl
