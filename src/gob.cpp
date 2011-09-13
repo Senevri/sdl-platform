@@ -42,6 +42,7 @@ void CGob::setIcon(CGob::gob * g, SDL_Surface *bitmap){
 void CGob::load(std::string bitmap, std::string name){
 	gob g;
 	g.name = name;
+	//leak?
 	g.icon = SDL_LoadBMP(bitmap.c_str());
 	g.loc = new SDL_Rect();
 	g.loc->x=0;

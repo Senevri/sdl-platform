@@ -93,8 +93,16 @@ bool CMyGame::testGobMove(int action){
 /*tests graphical object class*/
 void CMyGame::testGob(){
 	this->gobs->load("./data/testicon.bmp", "test");
-	this->gobs->draw(this->screen, "test");
+//	this->gobs->create("test");
+//	SDL_Surface foo;
+//	SDL_PixelFormat pfm;
+//	pfm.BitsPerPixel=24;
+//	pfm.BytesPerPixel=3;
+//	foo.flags = SDL_ANYFORMAT;
+
 	CGob::gob *g = this->gobs->find("test");
+	SDL_SetColorKey(g->icon, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(g->icon->format, 0xff, 0xff, 0xff));
+	this->gobs->draw(this->screen, "test");
 	g->loc->x = 288;
 	g->loc->y = 208;
 	SDL_Flip(screen);
@@ -186,7 +194,7 @@ void CMyGame::initialize(){
 	}
 	
 	//SDL_Surface *screen;
-	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BITS, SDL_HWSURFACE|SDL_ANYFORMAT);
+	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BITS, SDL_HWSURFACE|SDL_ANYFORMAT|SDL_DOUBLEBUF);
 	if ( screen == NULL ) {
 		fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
 		myWaitEvent();
