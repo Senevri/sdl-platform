@@ -1,10 +1,11 @@
 #include "game.h"
 #include <iostream>
 #include <cmath>
+#ifndef fixing 
 #include "InputHandler.h"
 #include "Console.h"
 #include "Zounds.h"
-
+#endif
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 #define SCREEN_BITS 32
@@ -36,9 +37,11 @@ CMyGame::CMyGame(){
 CMyGame::~CMyGame(){	
 	// clear all data
 	// Shutdown all subsystems
+#ifndef fixing
 	delete znd;
 	delete gobs;
 	TTF_Quit();
+#endif
 	SDL_Quit();	
 	exit(0);
 }
@@ -52,11 +55,9 @@ CMyGame::~CMyGame(){
 *By: Esa Karjalainen, 04. June, 2005
 ***********************************************************************/
 void CMyGame::runGame(){
-	// put some stuff on screen
-	//testScreen();
-	//testIcon();
-	testGob();
-	testZounds();
+	// put some stuff on 
+	//testGob();
+	//testZounds();
 	//the one, the only....
 	mainLoop();
 }
@@ -68,9 +69,10 @@ void CMyGame::runGame(){
 *
 *By: Esa Karjalainen, 04. June, 2005
 ***********************************************************************/
-bool CMyGame::testGobMove(int action){
+bool CMyGame::testGobMove(CGob::gob * g, int action){
 	enum actions {JUMP, LEFT, RIGHT, CONSOLE, QUIT};
-	CGob::gob * g = this->gobs->find("test");
+
+	//CGob::gob * g = this->gobs->find("test");
 	int max_speed = 6;
 	if (action == LEFT) {
 		if (g->move->x>-max_speed && g->loc->y>(SCREEN_HEIGHT-65)) {
@@ -88,24 +90,38 @@ bool CMyGame::testGobMove(int action){
 		}
 	}
 	return (g->loc->y>(SCREEN_HEIGHT-65));
+
+	return false;
 }
 
 /*tests graphical object class*/
 void CMyGame::testGob(){
-	this->gobs->load("./data/testicon.bmp", "test");
-//	this->gobs->create("test");
-//	SDL_Surface foo;
-//	SDL_PixelFormat pfm;
-//	pfm.BitsPerPixel=24;
-//	pfm.BytesPerPixel=3;
-//	foo.flags = SDL_ANYFORMAT;
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	SDL_RenderClear(renderer);
+
+	this->gobs->load("./graphics/testicon.bmp", "test");
 
 	CGob::gob *g = this->gobs->find("test");
-	SDL_SetColorKey(g->icon, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(g->icon->format, 0xff, 0xff, 0xff));
-	this->gobs->draw(this->screen, "test");
+	SDL_SetColorKey(g->icon, SDL_TRUE | SDL_RLEACCEL, SDL_MapRGB(g->icon->format, 0xff, 0xff, 0xff));	
 	g->loc->x = 288;
 	g->loc->y = 208;
-	SDL_Flip(screen);
+	this->gobs->draw(this->renderer, "test");
+	SDL_RenderPresent(renderer);
+	auto input = new InputHandler();
+	input->registerAction("exit", 123, SDL_KEYDOWN, SDLK_ESCAPE);
+
+	SDL_Event event;
+	bool bFlagQuit = false;
+	while ( ( SDL_PollEvent(&event) || bFlagQuit == false)) {
+		if (123 == input->queryEvent(&event)) {
+			bFlagQuit = true;
+		}
+		SDL_RenderPresent(renderer);
+	}
+	SDL_FlushEvent(SDL_KEYDOWN);
+	input->deRegister("exit");
+	delete(input);
+
 }
 
 void CMyGame::testZounds(){
@@ -117,7 +133,8 @@ void CMyGame::testZounds(){
 		0
 	};
 	cout <<"testZounds" <<endl;
-	znd = new Zounds();
+#ifndef fixing
+	znd = Zounds::getZounds();
 	double note;
 	int i=0;
 	Mix_Chunk * wave = NULL;
@@ -132,87 +149,43 @@ void CMyGame::testZounds(){
 		while(0 != Mix_Playing(snd));	
 		free(wave); 
 	}
-	
+#endif
 }
-/* tests we can load files */
-
-/*void CMyGame::testIcon(){
-	SDL_Surface *screen = this->screen;
-	SDL_SetClipRect(screen, NULL);
-	SDL_Surface *icon = SDL_LoadBMP(".\\data\\testicon.bmp");
-	SDL_Rect * dest = new SDL_Rect;
-	dest->x = 100;
-	dest->y = 100;
-		SDL_BlitSurface(icon, NULL, screen, dest);
-	
-	delete dest;
-	SDL_Flip(screen);
-}*/
-
-/*tests we can render on screen*/ /*
-void CMyGame::testScreen(){
-	SDL_Surface *screen = this->screen;
-	SDL_SetClipRect(screen, NULL);
-
-	int status = SDL_LockSurface(screen);
-	if (status==0){
-		cout << "screen locked" << endl;
-		Uint32 color = SDL_MapRGBA(screen->format, 255, 128, 128, 255);
-		SDL_Rect *rectangle = new SDL_Rect;
-		rectangle->x = 100;
-		rectangle->y = 100;
-		rectangle->w = 150;
-		rectangle->h = 150;
-		if (0!=SDL_FillRect(screen, rectangle, color)){
-			cout << "fillrect fail" << endl;
-		}
-		delete rectangle;
-		int y = 479;
-		int x = 639;
-		Uint32 * pixels  = (Uint32*) screen->pixels + (640*y) + (x);
-		*pixels = color;
-		SDL_UnlockSurface(screen);
-		SDL_Flip(screen);
-		//refresh surface?
-	} else {
-		cout << "status: " << status << endl;
-	}
-
-} */
 
 
 /*
- * Initialize
- */
+* Initialize
+*/
 
 void CMyGame::initialize(){
-		
+
 	// Initialize defaults, Video and Audio 
 	if((SDL_Init(SDL_INIT_EVERYTHING )<0)) { 
 		printf("Could not initialize SDL: %s.\n", SDL_GetError());
 		exit(-1);
 	}
-	
+
 	//SDL_Surface *screen;
-	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BITS, SDL_HWSURFACE|SDL_ANYFORMAT|SDL_DOUBLEBUF);
-	if ( screen == NULL ) {
+	window = SDL_CreateWindow("sdl-platform", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if ( window == NULL ) {
+		renderer = SDL_CreateRenderer(window, -1, 0);
 		fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
 		myWaitEvent();
 		exit(1);
 	}
 	this->gobs = new CGob();
-
 	this->gobs->create("console");
-/*	if(TTF_Init()==-1) {
-		printf("TTF_Init: %s\n", TTF_GetError());
-		exit(2);
+	/*	if(TTF_Init()==-1) {
+	printf("TTF_Init: %s\n", TTF_GetError());
+	exit(2);
 	}    
-*/	
+	*/	
 }
 
 /**
- * For now, unused callback
- */
+* For now, unused callback
+*/
 
 Uint32 CMyGame::myCallback(Uint32 interval, void *param){
 	SDL_Event event;
@@ -229,6 +202,7 @@ Uint32 CMyGame::myCallback(Uint32 interval, void *param){
 }
 void CMyGame::writeText(std::string maitext, int size, SDL_Color color){
 	/* font start*/
+#ifndef fixing
 	TTF_Font *font;
 	font=TTF_OpenFont("data\\FreeMono.ttf", 14);
 	if(!font) {
@@ -240,12 +214,12 @@ void CMyGame::writeText(std::string maitext, int size, SDL_Color color){
 	if (font) {
 		this->gobs->create("text");
 		this->gobs->setIcon("text", 
-				TTF_RenderText_Blended(font, maitext.c_str(), color));
+			TTF_RenderText_Blended(font, maitext.c_str(), color));
 		TTF_CloseFont(font);
 		font=NULL; // to be safe...
 	}
 	/* font end */
-
+#endif
 }
 
 /***********************************************************************
@@ -256,18 +230,23 @@ void CMyGame::writeText(std::string maitext, int size, SDL_Color color){
 
 /* FIXME: Siivoa ja refaktoroi jo kovasti! */
 void CMyGame::mainLoop(){
-	
-	//std::string text = "nou neulines,\n mou";
-	//SDL_Color color;
-	//color.r = 0; color.g=255; color.b=64;
-	//this->writeText(text, 14, color);
+
+	std::string text = "nou neulines,\n mou";
+	SDL_Color color;
+	color.r = 0; color.g=255; color.b=64;
+	this->writeText(text, 14, color);
 	static int ticks;
 	int now = SDL_GetTicks();
 	ticks = now + 33;
 	bool bFlagQuit = false;
 	SDL_Event event;
 
-	CGob::gob *g = this->gobs->find("test");
+	CGob::gob *g = this->gobs->load("./graphics/testicon.bmp", "test");
+	SDL_SetColorKey(g->icon, SDL_TRUE | SDL_RLEACCEL, SDL_MapRGB(g->icon->format, 0xff, 0xff, 0xff));	
+
+	if (!g) {
+		return;
+	}
 
 	//SDL_TimerID timer = SDL_AddTimer(33, myCallback, this);
 	InputHandler input;
@@ -276,44 +255,42 @@ void CMyGame::mainLoop(){
 
 	Console my_console;
 	my_console.setup(600, 400, "data\\FreeMono.ttf");
-//	my_console.write("haaaaaa");
-//	this->gobs->setIcon("console", my_console.get());
-//	this->gobs->draw(this->screen, "console");
-//	bool consoleMode = false;
-/*	my_console.writeln("dumptest line1");
-	my_console.writeln("dumptest line2");
-	my_console.writeln("dumptest line3");
-	my_console.writeln("dumptest line4");
-	my_console.writeln("              ");
+	my_console.write("haaaaaa");
 
-	my_console.setScreen(this->screen);
-	my_console.dump();
-*/
 	// name, id, sdl_event, value
 	input.registerAction("quit", QUIT, SDL_QUIT, 0);	
-	input.registerAction("jump", JUMP, SDL_KEYDOWN, SDLK_UP);
-	input.registerAction("left", LEFT, SDL_KEYDOWN, SDLK_LEFT);
-	input.registerAction("right", RIGHT, SDL_KEYDOWN, SDLK_RIGHT);
+	input.registerAction("jump", JUMP, SDL_KEYDOWN, SDLK_w);
+	input.registerAction("left", LEFT, SDL_KEYDOWN, SDLK_a);
+	input.registerAction("right", RIGHT, SDL_KEYDOWN, SDLK_d);
+	input.registerAction("ajump", JUMP, SDL_KEYDOWN, SDLK_UP);
+	input.registerAction("aleft", LEFT, SDL_KEYDOWN, SDLK_LEFT);
+	input.registerAction("aright", RIGHT, SDL_KEYDOWN, SDLK_RIGHT);
+
 	input.registerAction("quit", QUIT, SDL_KEYDOWN, SDLK_ESCAPE);
 	input.registerAction("console", CONSOLE, SDL_KEYDOWN, SDLK_TAB);
 
 	input.registerAction("close_console", CK, SDL_KEYUP, SDLK_TAB);
 
+	/*
 	input.registerAction("jjump", JUMP, SDL_JOYAXISMOTION, input.JOYUP);
-	input.registerAction("jlef", LEFT, SDL_JOYAXISMOTION, input.JOYLEFT);
+	input.registerAction("jleft", LEFT, SDL_JOYAXISMOTION, input.JOYLEFT);
 	input.registerAction("jright", RIGHT, SDL_JOYAXISMOTION, input.JOYRIGHT);
+	*/
 
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-	while ( ( SDL_PollEvent(&event) || bFlagQuit == false)) {
+	//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+	while ( bFlagQuit == false) {
+		SDL_PollEvent(&event);
+
 		int max_speed = 6;
-		now = SDL_GetTicks();
+		/*now = SDL_GetTicks();
 		if(now>ticks) {
-			ticks = now+33; 
+			ticks = now+10; 
 		} else {
 			SDL_Delay(ticks-now);
-		}
+		}*/
 
 		int mleft=0, mright=0, jump=0; /* move 'til keyup */
+
 		//a bit of inertia... if on ground
 		if (fabs(testx)>0.9 && g->loc->y>(SCREEN_HEIGHT-65)) { 
 			testx = (testx-(0.1*testx/fabs(testx)));
@@ -323,50 +300,55 @@ void CMyGame::mainLoop(){
 		testy = testy+0.5;
 		g->move->x = static_cast<int>(testx);
 		g->move->y = static_cast<int>(testy);
+
 		int action = input.queryEvent(&event);
 		switch (action) {		
-			case QUIT:
-				bFlagQuit = true;
-				printf("quit\n");
-				break;					
-			case LEFT:
-				testGobMove(action);
-				break;
-			case RIGHT:
-				testGobMove(action);
-				break;
-			case JUMP:
-				if (testGobMove(action)) {					
-					znd->playSound("./data/BONK.WAV");				
-				}
-				break;
-			case CONSOLE:
-				if(!my_console.active){
-				my_console.setScreen(this->screen);
+		case QUIT:
+			bFlagQuit = true;
+			printf("quit\n");
+			break;					
+		case LEFT:
+			testGobMove(g, action);
+			break;
+		case RIGHT:
+			testGobMove(g, action);
+			break;
+		case JUMP:
+			if (testGobMove(g, action)) {					
+				//znd->playSound("./data/BONK.WAV");				
+			}
+			break;
+		case CONSOLE:
+			if(!my_console.active){
+				my_console.setScreen(this->renderer);
 				my_console.activate();
 				action = 0;
-				} 
-				break;
-			case CK:
-				if(my_console.active){
-					my_console.active=false;
-				}
-				break;
+			} 
+			break;
+		case CK:
+			if(my_console.active){
+				my_console.active=false;
+			}
+			break;
 		}
+		//SDL_FillRect(this->screen, NULL, SDL_MapRGBA(this->screen->format, 0,0,0,0));
 
-		SDL_FillRect(this->screen, NULL, SDL_MapRGBA(this->screen->format, 0,0,0,0));
+
 		if ( 1 == mleft  ) {
 			SDL_Rect lcorner;
 			lcorner.x = 0;
 			lcorner.y = 0;
 			lcorner.w = 20;
 			lcorner.h = 20;
+
 			if (g->move->x>-max_speed) {
 				testx = testx - 1;
 			} else {
 				testx = -max_speed;
 			}
-			SDL_FillRect(this->screen, &lcorner, SDL_MapRGB(this->screen->format, 255,255,255));
+
+			//SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
+			//SDL_RenderFillRect(this->renderer, &lcorner);
 		}
 		if ( 1 == mright) {
 			if (g->move->x<max_speed) {
@@ -384,9 +366,10 @@ void CMyGame::mainLoop(){
 			if (g->loc->y<(SCREEN_HEIGHT-66)) {
 				jump = 0;
 			}
-		}
+		} 
 		this->gobs->move("test");
 
+		// prevent leaving screen
 		int x = g->loc->x;
 		int y = g->loc->y;
 		if (x>(SCREEN_WIDTH-64) || x<15 ){
@@ -403,35 +386,43 @@ void CMyGame::mainLoop(){
 				g->loc->y=15;
 			} else {
 				g->loc->y = SCREEN_HEIGHT-64;
-	}
+			}
 		}
+		//check input responsiveness.
+		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
+			SDL_SetRenderDrawColor(this->renderer, 100, 0, 0, 255);
+		} else {
+			SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+		}
+		SDL_RenderClear(this->renderer);
+		//SDL_FlushEvent(SDL_KEYDOWN);
 
-		this->gobs->draw(this->screen, "test");
-	//	this->gobs->draw(this->screen, "text");
-//		this->gobs->setIcon("console", my_console.get());
-//		this->gobs->draw(this->screen, "console");
+		this->gobs->draw(this->renderer, "test");
+		this->gobs->draw(this->renderer, "text");
+		//this->gobs->setIcon("console", my_console.get());
+		//this->gobs->draw(this->renderer, "console");
 		//my_console.dump();
 
-		SDL_Flip(this->screen);
-		}
+		SDL_RenderPresent(this->renderer);
 	}
+}
 
 
-	//I think this is junk...
-	void CMyGame::myWaitEvent(){
-		SDL_Event event;
-		SDL_WaitEvent(&event);
-		switch (event.type) {
-			case SDL_KEYDOWN:
-				printf("The %s key was pressed!\n",
-						SDL_GetKeyName(event.key.keysym.sym));
-				break;
-			case SDL_QUIT:
-				exit(0);
-				break;
-			default:
-				break;	
-		}
+//I think this is junk...
+void CMyGame::myWaitEvent(){
+	SDL_Event event;
+	SDL_WaitEvent(&event);
+	switch (event.type) {
+	case SDL_KEYDOWN:
+		printf("The %s key was pressed!\n",
+			SDL_GetKeyName(event.key.keysym.sym));
+		break;
+	case SDL_QUIT:
+		exit(0);
+		break;
+	default:
+		break;	
 	}
+}
 
-	//EOF
+//EOF

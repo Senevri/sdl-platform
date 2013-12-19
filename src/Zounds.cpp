@@ -4,7 +4,19 @@
 
 using namespace std;	
 
-Zounds::Zounds(){
+Zounds * Zounds::getZounds(void)
+{
+	/*if (Zounds::m_pSingleton) {
+		return Zounds::m_pSingleton;
+	} */
+	//m_pSingleton = new Zounds();
+	//return m_pSingleton;
+	return new Zounds();
+
+}
+
+Zounds::Zounds()
+{
 	m_rate = 44100;
 	m_buffer = 4096;
 	m_channels = 2;
@@ -67,7 +79,7 @@ int Zounds::playSound(std::string filename, int loops){
 void Zounds::musicDone(){
 	cout << "musicDone" <<endl;
 	Mix_HaltMusic();
-	Mix_FreeMusic(m_songs);
+	Mix_FreeMusic(Zounds::getZounds()->m_songs);
 }
 
 Mix_Chunk * Zounds::genSine(int duration, double hz, bool hibits) {

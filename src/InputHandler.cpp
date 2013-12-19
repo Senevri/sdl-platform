@@ -5,14 +5,15 @@ InputHandler::InputHandler(void)
 	printf("inputhandler constructor\n");	
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 	SDL_JoystickEventState(SDL_ENABLE);
-	if(SDL_NumJoysticks()>0){
+	if(SDL_NumJoysticks() > 0) {
 		this->m_pjoystick = SDL_JoystickOpen(0);
 	}
+
 }
 
 InputHandler::~InputHandler(void)
 {
-	if(SDL_JoystickOpened(0)){
+	if(this->m_pjoystick != nullptr){
 		SDL_JoystickClose(this->m_pjoystick);
 	}
 }
@@ -25,7 +26,7 @@ InputHandler::~InputHandler(void)
  */
 void InputHandler::registerAction(const std::string name, 
 		unsigned int id, 
-		unsigned char sdl_event_type, 
+		SDL_EventType sdl_event_type, 
 		Uint16 value)
 {
 	action a;
@@ -47,11 +48,10 @@ void InputHandler::deRegister(const std::string name){
 
 
 /*TODO: IN PROGRESS!!!1one*/
-int InputHandler::queryEvent(const SDL_Event *event){
-	std::vector<action>::iterator itr;
+int InputHandler::queryEvent(const SDL_Event *event){	
 	int deadzone = 8000;
 	int motion=-1;
-	for ( itr = this->actions.begin(); itr < this->actions.end(); ++itr ){
+	for (auto itr = this->actions.begin(); itr < this->actions.end(); ++itr ){
 		if(event->type == itr->sdl_event_type){
 			switch(event->type){
 			case SDL_KEYUP:

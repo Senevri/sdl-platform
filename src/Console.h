@@ -21,7 +21,7 @@ public:
 	void dump();
 	void writeln(std::string);
 	void write(std::string);
-	void setScreen(SDL_Surface * screen);
+	void setScreen(SDL_Renderer * window);
 	void draw();
 	bool active;
 private:
@@ -29,7 +29,7 @@ private:
 	SDL_Surface * m_psurface;
 	std::string m_font;
 	SDL_Color color; 
-	SDL_Surface * m_screen;
+	SDL_Renderer * m_renderer;
 	InputHandler m_input;
 	std::vector<Uint16 *> m_lines;
 	void drawCursor(int i);

@@ -18,7 +18,8 @@ class CGob{
 public:
 	typedef struct {
 		SDL_Surface * icon;
-		std::string name;
+		SDL_Texture * texture;
+		std::string name;		
 		SDL_Rect * loc;
 		SDL_Rect * move;
 		bool visible;
@@ -32,8 +33,8 @@ public:
 	void create(std::string name);
 	void setIcon(CGob::gob * g, SDL_Surface *bitmap);
 	void setIcon(std::string name, SDL_Surface *bitmap);
-	void draw(SDL_Surface * screen, std::string name);
-	void load(std::string bitmap, std::string name);
+	void draw(SDL_Renderer * renderer, std::string name);
+	CGob::gob * load(std::string bitmap, std::string name);
 	void move(std::string, int, int);
 	void move(std::string);
 	CGob::gob * find(std::string name);

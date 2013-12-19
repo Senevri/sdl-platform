@@ -1,13 +1,14 @@
 #pragma once 
 
-#include "SDL.h"
-#include "gob.h"
-#include "Console.h"
-#include "Zounds.h"
 #include <vector>
 #include <string>
-#include "SDL_ttf.h"
-
+#include "SDL.h"
+#ifndef fixing
+	#include "gob.h"
+	#include "Console.h"
+	#include "Zounds.h"
+	#include "SDL_ttf.h"
+#endif
 /*externals*/
 //#include "../ext/StickyInput.h"
 
@@ -22,9 +23,12 @@ public:
 	void runGame();
 
 private:
+#ifndef fixing
 	CGob* gobs;
 	Zounds * znd;
-	SDL_Surface * screen;
+#endif
+	SDL_Window * window;
+	SDL_Renderer * renderer;
 	void initialize();
 	void myWaitEvent();
 	void mainLoop();
@@ -36,7 +40,7 @@ private:
 	void moveGOB(std::string, int, int);
 	CMyGame::gob * findGOB(std::string name);
 	void moveGOB(std::string);*/
-	bool testGobMove(int action);
+	bool testGobMove(CGob::gob * g, int action);
 	static Uint32 myCallback(Uint32 interval, void *param);
 
 	void writeText(std::string maitext, int size, SDL_Color color);

@@ -10,14 +10,20 @@ CGob::CGob(){
 
 CGob::~CGob(){
 	for(Uint32 i=0;i<gobs.size();i++){
-		delete gobs[i].loc;
-		delete gobs[i].move;
+		try {
+			//SDL_FreeSurface(gobs[i].icon);
+			delete gobs[i].loc;
+			delete gobs[i].move;
+		} catch (std::exception ex) {
+			std::printf(ex.what());
+		}
 	}
 	gobs.clear();
 }
 
 void CGob::create(std::string name){
 	gob g;
+	g.texture = nullptr;	
 	g.name = name;	
 	g.loc = new SDL_Rect();
 	g.loc->x=0;
@@ -25,32 +31,38 @@ void CGob::create(std::string name){
 	g.move = new SDL_Rect();
 	g.move->x=0;
 	g.move->y=0;
+
 	g.visible=true;
 	this->gobs.push_back(g);
 }
 
 void CGob::setIcon(std::string name, SDL_Surface *bitmap){
 	gob *g=find(name);
-	g->icon = bitmap;
+	setIcon(g, bitmap);
 }
 
 /* Way faster */
 void CGob::setIcon(CGob::gob * g, SDL_Surface *bitmap){
 	g->icon = bitmap;
+	g->loc = &bitmap->clip_rect;
 }
 
-void CGob::load(std::string bitmap, std::string name){
+CGob::gob * CGob::load(std::string bitmap, std::string name){
 	gob g;
+	g.texture = nullptr;
 	g.name = name;
 	//leak?
 	g.icon = SDL_LoadBMP(bitmap.c_str());
 	g.loc = new SDL_Rect();
 	g.loc->x=0;
 	g.loc->y=0;
+	g.loc->w = g.icon->w;
+	g.loc->h = g.icon->h;
 	g.move = new SDL_Rect();
 	g.move->x=0;
 	g.move->y=0;
 	this->gobs.push_back(g);
+	return find(name);
 }
 
 CGob::gob * CGob::find(std::string name){
@@ -58,15 +70,24 @@ CGob::gob * CGob::find(std::string name){
 	for(Uint8 i=0;i<gobs.size();i++){
 		if(0==(gobs[i].name.compare(name))){
 			g = &gobs[i];
+			break;
 		}
 	}
 	return g;
 }
 
-void CGob::draw(SDL_Surface *screen, std::string name){
+void CGob::draw(SDL_Renderer *screen, std::string name){
 	gob *g=find(name);
-	SDL_SetClipRect(screen, NULL);
-	SDL_BlitSurface(g->icon, NULL, screen, g->loc);
+	if (nullptr == g) return;
+
+	if (g->texture == nullptr) { // FIXME not nullpointer because I don't know!
+		g->texture = SDL_CreateTextureFromSurface(screen, g->icon);
+		//SDL_FreeSurface(g->icon);
+	} else {
+		//
+	}
+
+	SDL_RenderCopy(screen, g->texture, NULL, g->loc);			
 }
 
 void CGob::move(std::string name, int x, int y){

@@ -16,7 +16,7 @@ public:
 	InputHandler(void);
 	~InputHandler(void);
 	/* add a potential action to look out for */
-	void registerAction(const std::string name, unsigned int id, unsigned char sdl_event_type, Uint16 value);
+	void registerAction(const std::string name, unsigned int id, SDL_EventType sdl_event_type, Uint16 value);
 	void deRegister(const std::string name);
 	int queryEvent(const SDL_Event *event); /* returns ID of event. */
 	std::string queryEventName(unsigned int id);
@@ -25,7 +25,7 @@ private:
 	typedef struct{
 		std::string name;
 		unsigned int id;
-		unsigned char sdl_event_type;
+		SDL_EventType sdl_event_type;
 		Uint16 value;
 	} action;
 	std::vector<action> actions;
