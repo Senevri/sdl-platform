@@ -1,5 +1,5 @@
-# SDL-platfor
-jm
+# SDL-platform
+
 uses SDL2, SDL2_Mixer, SDL2_TTF;
 
 Audio, sprites, user input.
