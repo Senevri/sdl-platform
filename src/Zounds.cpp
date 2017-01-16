@@ -27,6 +27,7 @@ Zounds::Zounds()
 		exit(1); 
 	}
 	Mix_QuerySpec(&m_rate, &m_format, &m_channels);
+	Mix_AllocateChannels(m_channels);
 }
 Zounds::~Zounds(){
 	Mix_FreeChunk(m_sound);
@@ -60,6 +61,10 @@ void Zounds::playMusic(std::string filename, int loops){
 		m_songs = NULL;
 		playMusic(filename, loops);
 	}
+}
+
+bool Zounds::isPlayingMusic() {
+	return Mix_PlayingMusic()==1;
 }
 
 
@@ -99,7 +104,7 @@ Mix_Chunk * Zounds::genSine(int duration, double hz, bool hibits) {
 			sound->abuf[i] = ca[0];
 			sound->abuf[i+1] = ca[1];
 		} else {
-			sound->abuf[i] = val + (m_format == AUDIO_U8 ? 127 : 0);	
+			sound->abuf[i] = val + (m_format == AUDIO_U16 ? 32768 : 0);	
 		}
 	}
 	return sound;

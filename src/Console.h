@@ -14,6 +14,7 @@
 class Console{
 public:
 	Console();
+	int init();
 	~Console();
 	void setup(int width, int height, std::string font);
 	SDL_Surface * get();

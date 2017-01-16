@@ -11,6 +11,7 @@ class Zounds{
 		Mix_Chunk * genSine(int duration, double hz, bool hibits = false);
 		void playMusic(std::string filename, int loops=0);
 		int playSound(std::string filename, int loops=0);
+		bool isPlayingMusic();
 		static Zounds * getZounds(void); 
 
 	private:

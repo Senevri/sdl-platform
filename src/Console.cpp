@@ -1,22 +1,33 @@
 #include "Console.h"
+#include "Debug.h"
 #include "SDL_ttf.h"
 #include <ostream>
+
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
 Console::Console()
 {
-	if(0==TTF_WasInit()){
-		if(TTF_Init()==-1) {
-			printf("TTF_Init: %s\n", TTF_GetError());
-			exit(2);
-		}   
+	if (2 == init()) {
+		exit(2);
 	}
+	
 	this->color.r = 0;
 	this->color.g = 255;
 	this->color.b = 64;
 	this->active = false;
+}
+
+int Console::init() {
+	if (0 == TTF_WasInit()) {
+		if (TTF_Init() == -1) {
+			Debug::Log("TTF_Init: %s\n", TTF_GetError());
+			return 2;
+		}
+		return 0;
+	}
+	return 1;
 }
 
 Console::~Console()
@@ -73,6 +84,7 @@ void Console::writeln(std::string str){
 		std::copy(ustr.begin(), ustr.end(), line->begin());
 	} catch (std::exception ex) {
 		std::cerr << "problem copying wchar_t to Uint16" <<std::endl;
+		Debug::Log("problem copying wchar_t to Uint16");
 	}
 	
 
@@ -87,6 +99,7 @@ void Console::write(std::string str){
 }
 
 void Console::writeText(const Uint16 * text, int size, SDL_Color color){
+	init();
 	wprintf((const wchar_t*)text);
 	printf("\n");
 	/* font start*/
@@ -94,7 +107,7 @@ void Console::writeText(const Uint16 * text, int size, SDL_Color color){
 	TTF_Font *font;
 	font=TTF_OpenFont(this->m_font.c_str(), size);
 	if(!font) {
-		printf("TTF_OpenFont: %s\n", TTF_GetError());
+		Debug::Log("writeText -- TTF_OpenFont: %s\n", TTF_GetError());
 		// handle error
 	}
 	/*do stuff with font*/
@@ -116,16 +129,17 @@ void Console::writeText(const Uint16 * text, int size, SDL_Color color){
 		TTF_CloseFont(font);
 		font=NULL; // to be safe...
 	}
-	delete (tempsurface);
+	SDL_FreeSurface(tempsurface);
 	/* font end */
 }
 
 void Console::drawCursor(int i){
+	init();
 	SDL_Surface * tempsurface = 0;
 	TTF_Font *font;
 	font=TTF_OpenFont(this->m_font.c_str(), 14);
 	if(!font) {
-		printf("TTF_OpenFont: %s\n", TTF_GetError());
+		Debug::Log("drawCursor -- TTF_OpenFont: %s\n", TTF_GetError());
 		// handle error
 	}
 	/*do stuff with font*/
@@ -147,7 +161,7 @@ void Console::drawCursor(int i){
 		TTF_CloseFont(font);
 		font=NULL; // to be safe...
 	}
-	delete (tempsurface);
+	SDL_FreeSurface(tempsurface);
 
 }
 
@@ -173,7 +187,7 @@ void Console::activate(){
 		} else {
 			
 			if (event.type == SDL_TEXTEDITING) {
-				std::printf(event.text.text);
+				Debug::Log(event.text.text);
 				//std::copy(current_line, event.text.text);
 
 			}

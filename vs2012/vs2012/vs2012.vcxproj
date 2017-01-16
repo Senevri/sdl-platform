@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -18,23 +18,24 @@
     <ProjectGuid>{0278B771-3091-400B-8333-CF490DD49B95}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>vs2012</RootNamespace>
+    <ProjectName>visualC</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='fixing|Win32'">
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -55,26 +56,28 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>E:\dev\tekele\sdl-platform\libs\SDL2_ttf-2.0.12\include;E:\dev\tekele\sdl-platform\libs\SDL2_mixer-2.0.0\include;E:\dev\tekele\sdl-platform\libs\SDL2-2.0.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\libs\SDL2_ttf-2.0.12\include;$(ProjectDir)..\..\libs\SDL2_mixer-2.0.0\include;$(ProjectDir)..\..\libs\SDL2-2.0.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(SolutionDir)..\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>E:\dev\tekele\sdl-platform\libs\SDL2_ttf-2.0.12\lib\x86;E:\dev\tekele\sdl-platform\libs\SDL2_mixer-2.0.0\lib\x86;E:\dev\tekele\sdl-platform\libs\SDL2-2.0.1\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\libs\SDL2_ttf-2.0.12\lib\x86;$(SolutionDir)..\libs\SDL2_mixer-2.0.0\lib\x86;$(SolutionDir)..\libs\SDL2-2.0.5\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Message>copy dlls and assets</Message>
-      <Command>copy /Y $(SolutionDir)..\dlls\* $(SolutionDir)..\$(Configuration)\ &amp;&amp; xcopy /Y /E $(SolutionDir)..\assets $(SolutionDir)..\$(Configuration)\</Command>
+      <Command>copy /Y $(SolutionDir)..\dlls\* $(SolutionDir)..\$(Configuration)\
+xcopy /Y /E $(SolutionDir)..\assets $(SolutionDir)..\$(Configuration)\assets\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,6 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Console.cpp" />
+    <ClCompile Include="..\..\src\Debug.cpp" />
     <ClCompile Include="..\..\src\game.cpp" />
     <ClCompile Include="..\..\src\gob.cpp" />
     <ClCompile Include="..\..\src\InputHandler.cpp" />
@@ -128,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Console.h" />
+    <ClInclude Include="..\..\src\Debug.h" />
     <ClInclude Include="..\..\src\game.h" />
     <ClInclude Include="..\..\src\gob.h" />
     <ClInclude Include="..\..\src\InputHandler.h" />

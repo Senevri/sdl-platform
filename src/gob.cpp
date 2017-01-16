@@ -3,12 +3,12 @@
  * Constructor, Destructor
  */
 
-CGob::CGob(){
+Gob::Gob(){
 
 }
 
 
-CGob::~CGob(){
+Gob::~Gob(){
 	for(Uint32 i=0;i<gobs.size();i++){
 		try {
 			//SDL_FreeSurface(gobs[i].icon);
@@ -21,7 +21,7 @@ CGob::~CGob(){
 	gobs.clear();
 }
 
-void CGob::create(std::string name){
+void Gob::create(std::string name){
 	gob g;
 	g.texture = nullptr;	
 	g.name = name;	
@@ -36,18 +36,18 @@ void CGob::create(std::string name){
 	this->gobs.push_back(g);
 }
 
-void CGob::setIcon(std::string name, SDL_Surface *bitmap){
+void Gob::setIcon(std::string name, SDL_Surface *bitmap){
 	gob *g=find(name);
 	setIcon(g, bitmap);
 }
 
 /* Way faster */
-void CGob::setIcon(CGob::gob * g, SDL_Surface *bitmap){
+void Gob::setIcon(Gob::gob * g, SDL_Surface *bitmap){
 	g->icon = bitmap;
 	g->loc = &bitmap->clip_rect;
 }
 
-CGob::gob * CGob::load(std::string bitmap, std::string name){
+Gob::gob * Gob::load(std::string bitmap, std::string name){
 	gob g;
 	g.texture = nullptr;
 	g.name = name;
@@ -65,7 +65,7 @@ CGob::gob * CGob::load(std::string bitmap, std::string name){
 	return find(name);
 }
 
-CGob::gob * CGob::find(std::string name){
+Gob::gob * Gob::find(std::string name){
 	gob *g = NULL;
 	for(Uint8 i=0;i<gobs.size();i++){
 		if(0==(gobs[i].name.compare(name))){
@@ -76,7 +76,7 @@ CGob::gob * CGob::find(std::string name){
 	return g;
 }
 
-void CGob::draw(SDL_Renderer *screen, std::string name){
+void Gob::draw(SDL_Renderer *screen, std::string name){
 	gob *g=find(name);
 	if (nullptr == g) return;
 
@@ -90,7 +90,7 @@ void CGob::draw(SDL_Renderer *screen, std::string name){
 	SDL_RenderCopy(screen, g->texture, NULL, g->loc);			
 }
 
-void CGob::move(std::string name, int x, int y){
+void Gob::move(std::string name, int x, int y){
 	gob *g=find(name);
 	int newx;
 	newx = g->loc->x + x;
@@ -98,7 +98,7 @@ void CGob::move(std::string name, int x, int y){
 	newy = g->loc->y + y;
 }
 
-void CGob::move(std::string name){
+void Gob::move(std::string name){
 	gob *g=find(name);
 	int newx;
 	newx = g->loc->x + g->move->x;

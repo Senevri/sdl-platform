@@ -4,6 +4,7 @@
 #ifndef fixing 
 #include "InputHandler.h"
 #include "Console.h"
+#include "Debug.h"
 #include "Zounds.h"
 #endif
 #define SCREEN_WIDTH 640
@@ -14,7 +15,7 @@ using namespace std;
 //Main loop necessary to run...
 
 int main(int argc, char *argv[]) {    
-	CMyGame * p = new CMyGame();
+	MyGame * p = new MyGame();
 	p->runGame();
 	delete p;	
 	return 0;
@@ -27,14 +28,16 @@ int main(int argc, char *argv[]) {
 *
 *By: Esa Karjalainen, 04. June, 2005
 ***********************************************************************/
-CMyGame::CMyGame(){
+MyGame::MyGame(){
 	testx = 0;
 	testy = 0;	
+	Debug::SetLogFile("./log.txt");
+	Debug::Log("Logging start!");
 	initialize();
 }
 
 //destructor
-CMyGame::~CMyGame(){	
+MyGame::~MyGame(){	
 	// clear all data
 	// Shutdown all subsystems
 #ifndef fixing
@@ -54,11 +57,13 @@ CMyGame::~CMyGame(){
 *
 *By: Esa Karjalainen, 04. June, 2005
 ***********************************************************************/
-void CMyGame::runGame(){
+void MyGame::runGame(){
 	// put some stuff on 
 	//testGob();
+	
 	//testZounds();
 	//the one, the only....
+	testFont();
 	mainLoop();
 }
 
@@ -69,7 +74,7 @@ void CMyGame::runGame(){
 *
 *By: Esa Karjalainen, 04. June, 2005
 ***********************************************************************/
-bool CMyGame::testGobMove(CGob::gob * g, int action){
+bool MyGame::testGobMove(Gob::gob * g, int action){
 	enum actions {JUMP, LEFT, RIGHT, CONSOLE, QUIT};
 
 	//CGob::gob * g = this->gobs->find("test");
@@ -95,13 +100,13 @@ bool CMyGame::testGobMove(CGob::gob * g, int action){
 }
 
 /*tests graphical object class*/
-void CMyGame::testGob(){
+void MyGame::testGob(){
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
 
-	this->gobs->load("./graphics/testicon.bmp", "test");
+	this->gobs->load("./assets/graphics/testicon.bmp", "test");
 
-	CGob::gob *g = this->gobs->find("test");
+	Gob::gob *g = this->gobs->find("test");
 	SDL_SetColorKey(g->icon, SDL_TRUE | SDL_RLEACCEL, SDL_MapRGB(g->icon->format, 0xff, 0xff, 0xff));	
 	g->loc->x = 288;
 	g->loc->y = 208;
@@ -124,7 +129,7 @@ void CMyGame::testGob(){
 
 }
 
-void CMyGame::testZounds(){
+void MyGame::testZounds(){
 	int snd;
 	double  notes[] = {
 		261.626, 
@@ -138,18 +143,26 @@ void CMyGame::testZounds(){
 	double note;
 	int i=0;
 	Mix_Chunk * wave = NULL;
+
+	znd->playMusic(std::string("./assets/closer.mod"));
 	while ((note=notes[i])) {
 		i++;
 		cout << note <<endl;
-		//znd->playMusic(std::string("./data/closer.mod"));
+		
 		wave = znd->genSine(1, note, true);
 		wave->volume = 63;
 		snd = znd->playSound(wave);
 		//snd = znd->playSound("./data/BONK.WAV");
 		while(0 != Mix_Playing(snd));	
+		Mix_FreeChunk(wave);
 		free(wave); 
+		//while (znd->isPlaying());
 	}
 #endif
+}
+
+void MyGame::testFont()
+{
 }
 
 
@@ -157,11 +170,11 @@ void CMyGame::testZounds(){
 * Initialize
 */
 
-void CMyGame::initialize(){
+void MyGame::initialize(){
 
 	// Initialize defaults, Video and Audio 
 	if((SDL_Init(SDL_INIT_EVERYTHING )<0)) { 
-		printf("Could not initialize SDL: %s.\n", SDL_GetError());
+		Debug::Log("Could not initialize SDL: %s.\n", SDL_GetError());
 		exit(-1);
 	}
 
@@ -170,11 +183,12 @@ void CMyGame::initialize(){
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if ( window == NULL ) {
 		renderer = SDL_CreateRenderer(window, -1, 0);
-		fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
+		Debug::Log("Unable to set 640x480 video: %s\n", SDL_GetError());
+
 		myWaitEvent();
 		exit(1);
 	}
-	this->gobs = new CGob();
+	this->gobs = new Gob();
 	this->gobs->create("console");
 	/*	if(TTF_Init()==-1) {
 	printf("TTF_Init: %s\n", TTF_GetError());
@@ -187,7 +201,7 @@ void CMyGame::initialize(){
 * For now, unused callback
 */
 
-Uint32 CMyGame::myCallback(Uint32 interval, void *param){
+Uint32 MyGame::myCallback(Uint32 interval, void *param){
 	SDL_Event event;
 	SDL_UserEvent userevent;
 	userevent.type = SDL_USEREVENT;
@@ -200,13 +214,16 @@ Uint32 CMyGame::myCallback(Uint32 interval, void *param){
 	SDL_PushEvent(&event);
 	return interval;
 }
-void CMyGame::writeText(std::string maitext, int size, SDL_Color color){
+void MyGame::writeText(std::string maitext, int size, SDL_Color color){
 	/* font start*/
 #ifndef fixing
 	TTF_Font *font;
-	font=TTF_OpenFont("data\\FreeMono.ttf", 14);
+	font=TTF_OpenFont("./assets/clacon.ttf", 14);
 	if(!font) {
-		printf("TTF_OpenFont: %s\n", TTF_GetError());
+		auto ops = SDL_RWFromFile("./assets/clacon.ttf", "rb");		
+		SDL_assert(ops->size(ops) > 0);
+		ops->close(ops);
+		Debug::Log("MyGame::writeTExt -- TTF_OpenFont: %s\n", TTF_GetError());
 		// handle error
 	}
 	/*do stuff with font*/
@@ -229,7 +246,7 @@ void CMyGame::writeText(std::string maitext, int size, SDL_Color color){
 ***********************************************************************/
 
 /* FIXME: Siivoa ja refaktoroi jo kovasti! */
-void CMyGame::mainLoop(){
+void MyGame::mainLoop(){
 
 	std::string text = "nou neulines,\n mou";
 	SDL_Color color;
@@ -241,7 +258,7 @@ void CMyGame::mainLoop(){
 	bool bFlagQuit = false;
 	SDL_Event event;
 
-	CGob::gob *g = this->gobs->load("./graphics/testicon.bmp", "test");
+	Gob::gob *g = this->gobs->load("./assets/graphics/testicon.bmp", "test");
 	SDL_SetColorKey(g->icon, SDL_TRUE | SDL_RLEACCEL, SDL_MapRGB(g->icon->format, 0xff, 0xff, 0xff));	
 
 	if (!g) {
@@ -254,7 +271,7 @@ void CMyGame::mainLoop(){
 	enum actions {JUMP, LEFT, RIGHT, CONSOLE, CK, QUIT};
 
 	Console my_console;
-	my_console.setup(600, 400, "data\\FreeMono.ttf");
+	my_console.setup(600, 400, "./assets/clacon.ttf");
 	my_console.write("haaaaaa");
 
 	// name, id, sdl_event, value
@@ -305,7 +322,7 @@ void CMyGame::mainLoop(){
 		switch (action) {		
 		case QUIT:
 			bFlagQuit = true;
-			printf("quit\n");
+			Debug::Log("quit\n");
 			break;					
 		case LEFT:
 			testGobMove(g, action);
@@ -409,12 +426,12 @@ void CMyGame::mainLoop(){
 
 
 //I think this is junk...
-void CMyGame::myWaitEvent(){
+void MyGame::myWaitEvent(){
 	SDL_Event event;
 	SDL_WaitEvent(&event);
 	switch (event.type) {
 	case SDL_KEYDOWN:
-		printf("The %s key was pressed!\n",
+		Debug::Log("The %s key was pressed!\n",
 			SDL_GetKeyName(event.key.keysym.sym));
 		break;
 	case SDL_QUIT:
@@ -426,3 +443,4 @@ void CMyGame::myWaitEvent(){
 }
 
 //EOF
+

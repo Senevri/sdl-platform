@@ -13,7 +13,7 @@
  */
 
 
-class CGob{
+class Gob{
 
 public:
 	typedef struct {
@@ -26,18 +26,18 @@ public:
 	} gob;
 
 	//constructor, destructor
-	CGob();
-	~CGob();
+	Gob();
+	~Gob();
 
 	//methods
 	void create(std::string name);
-	void setIcon(CGob::gob * g, SDL_Surface *bitmap);
+	void setIcon(Gob::gob * g, SDL_Surface *bitmap);
 	void setIcon(std::string name, SDL_Surface *bitmap);
 	void draw(SDL_Renderer * renderer, std::string name);
-	CGob::gob * load(std::string bitmap, std::string name);
+	Gob::gob * load(std::string bitmap, std::string name);
 	void move(std::string, int, int);
 	void move(std::string);
-	CGob::gob * find(std::string name);
+	Gob::gob * find(std::string name);
 	void hide(std::string name){ gob * g = this->find(name); g->visible=false; }
 	void show(std::string name){ gob * g = this->find(name); g->visible=true; }
 

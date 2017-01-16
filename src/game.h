@@ -12,19 +12,19 @@
 /*externals*/
 //#include "../ext/StickyInput.h"
 
-class CMyGame{
+class MyGame{
 
 public:
 	//constructor, destructor
-	CMyGame();
-	~CMyGame();
+	MyGame();
+	~MyGame();
 
 	//methods
 	void runGame();
 
 private:
 #ifndef fixing
-	CGob* gobs;
+	Gob* gobs;
 	Zounds * znd;
 #endif
 	SDL_Window * window;
@@ -40,14 +40,13 @@ private:
 	void moveGOB(std::string, int, int);
 	CMyGame::gob * findGOB(std::string name);
 	void moveGOB(std::string);*/
-	bool testGobMove(CGob::gob * g, int action);
+	bool testGobMove(Gob::gob * g, int action);
 	static Uint32 myCallback(Uint32 interval, void *param);
 
 	void writeText(std::string maitext, int size, SDL_Color color);
 	void testGob();
 	void testZounds();
-	void testScreen();
-	void testIcon();
+	void testFont();
 	float testx;
 	float testy;
 };
